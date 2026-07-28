@@ -11,7 +11,7 @@ build = [ ]
 run = [
   "sh",
   "-c",
-  "node server.js"
+  "npm start"
 ]
 
 [deploy]
@@ -19,5 +19,5 @@ build = [ ]
 run = [
   "sh",
   "-c",
-  "node server.js"
+  "npm start"
 ]

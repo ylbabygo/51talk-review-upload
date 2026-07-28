@@ -33,7 +33,7 @@
 ## 开发命令
 ```bash
 # 启动开发服务器
-npx serve -l 5000 -s .
+npm start
 
 # 访问页面
 http://localhost:5000

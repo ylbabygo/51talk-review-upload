@@ -1,0 +1,13 @@
+{
+  "name": "51talk-review-upload",
+  "version": "1.0.0",
+  "description": "51Talk好评截图上传H5页面",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "keywords": ["51talk", "h5", "upload"],
+  "author": "",
+  "license": "MIT"
+}
