@@ -99,13 +99,15 @@
                   type="text" 
                   class="input-field" 
                   id="orderIdInput"
-                  placeholder="请输入您的订单ID"
+                  placeholder="请输入19位订单ID（69开头）"
+                  inputmode="numeric"
+                  maxlength="19"
                   oninput="handleOrderIdInput(event)"
                 />
                 <button type="button" class="input-clear" id="inputClear" onclick="clearOrderId()">×</button>
               </div>
               
-              <div class="input-hint">请在抖音订单详情中查看订单ID</div>
+              <div class="input-hint">请在抖音订单详情中查看订单ID（69开头的19位数字）</div>
               
               <div class="error-message" id="orderIdError">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -113,7 +115,7 @@
                   <line x1="12" y1="8" x2="12" y2="12"/>
                   <line x1="12" y1="16" x2="12.01" y2="16"/>
                 </svg>
-                请输入订单ID
+                <span id="orderIdErrorText">请输入订单ID</span>
               </div>
             </div>
 
@@ -242,7 +244,11 @@
 
       // 订单ID输入处理
       function handleOrderIdInput(event) {
-        const value = event.target.value.trim();
+        // 只允许输入数字
+        let value = event.target.value.replace(/[^0-9]/g, '');
+        event.target.value = value;
+        
+        value = value.trim();
         state.orderId = value;
 
         const clearBtn = document.getElementById('inputClear');
@@ -252,7 +258,21 @@
           clearBtn.classList.remove('show');
         }
 
-        hideError('orderIdError');
+        // 验证订单ID格式：69开头的19位数字
+        if (value.length > 0) {
+          if (!value.startsWith('69')) {
+            showError('orderIdError', '订单ID必须以69开头');
+          } else if (value.length < 19) {
+            hideError('orderIdError');
+          } else if (value.length === 19) {
+            hideError('orderIdError');
+          } else {
+            hideError('orderIdError');
+          }
+        } else {
+          hideError('orderIdError');
+        }
+        
         updateSubmitButton();
       }
 
@@ -268,7 +288,10 @@
       // 更新提交按钮状态
       function updateSubmitButton() {
         const btn = document.getElementById('submitBtn');
-        if (state.imageUploaded && state.orderId.length > 0) {
+        // 订单ID必须是69开头的19位数字
+        const isOrderIdValid = state.orderId.length === 19 && state.orderId.startsWith('69');
+        
+        if (state.imageUploaded && isOrderIdValid) {
           btn.disabled = false;
         } else {
           btn.disabled = true;
@@ -300,6 +323,17 @@
 
         if (!state.orderId) {
           showError('orderIdError', '请输入订单ID');
+          return;
+        }
+
+        // 验证订单ID格式：69开头的19位数字
+        if (!state.orderId.startsWith('69')) {
+          showError('orderIdError', '订单ID必须以69开头');
+          return;
+        }
+
+        if (state.orderId.length !== 19) {
+          showError('orderIdError', '订单ID必须是19位数字');
           return;
         }
 
