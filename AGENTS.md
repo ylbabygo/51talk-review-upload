@@ -13,12 +13,14 @@
 .
 ├── index.html          # 主页面
 ├── styles/
-│   ── main.css        # 样式文件
+│   └── main.css        # 样式文件
 ├── public/
-│   ├── toki-greeting.png   # Toki打招呼图片
-│   ── toki-celebrate.png  # Toki庆祝图片
-├── .coze               # 项目配置
-└── DESIGN.md           # 设计规范
+│   ├── logo.png            # 51Talk品牌Logo
+│   ├── toki-greeting.gif   # Toki打招呼GIF（戴耳机）
+│   └── toki-celebrate.gif  # Toki庆祝GIF（无耳机）
+── assets/                 # 原始素材目录
+── .coze               # 项目配置
+── DESIGN.md           # 设计规范
 ```
 
 ## 核心功能
@@ -51,3 +53,4 @@ http://localhost:5000
 3. 提交按钮在未填写完整时禁用
 4. 成功页面不显示"再次上传"按钮
 5. 页面离开时如有未提交内容会提示用户
+6. Toki角色使用GIF格式，背景透明，动作循环自然

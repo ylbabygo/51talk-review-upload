@@ -38,15 +38,10 @@ body {
   text-align: left;
 }
 
-.brand-logo {
-  font-size: 28px;
-  font-weight: 700;
-  color: #4F46E5;
-  letter-spacing: -0.5px;
-}
-
-.brand-logo span {
-  color: #1F2937;
+.brand-logo-img {
+  width: 88px;
+  height: auto;
+  display: block;
 }
 
 /* 主卡片 */
