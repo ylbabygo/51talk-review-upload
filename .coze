@@ -13,9 +13,8 @@ build = [
   "echo 'Building...'"
 ]
 run = [
-  "sh",
-  "-c",
-  "node server.js"
+  "node",
+  "server.js"
 ]
 
 [deploy]
@@ -25,7 +24,6 @@ build = [
   "echo 'Deploy build...'"
 ]
 run = [
-  "sh",
-  "-c",
-  "node server.js"
+  "node",
+  "server.js"
 ]
