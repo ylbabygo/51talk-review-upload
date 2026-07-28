@@ -33,7 +33,7 @@
 ## 开发命令
 ```bash
 # 启动开发服务器
-npm start
+node server.js
 
 # 访问页面
 http://localhost:5000
