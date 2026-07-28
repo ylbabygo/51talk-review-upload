@@ -5,7 +5,7 @@
 
 ## 技术栈
 - 原生HTML/CSS/JavaScript
-- Python http.server（静态文件服务）
+- Node.js HTTP服务器（server.js）
 - 移动端适配（375px-414px）
 
 ## 项目结构
