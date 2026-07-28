@@ -2,32 +2,394 @@
 <html lang="zh-CN">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="扣子编程，你的 AI 开发伙伴已就位" />
-    <title>扣子编程 - AI 开发伙伴</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="description" content="51Talk好评截图上传，领取36,000香蕉币奖励" />
+    <title>51Talk - 上传好评截图</title>
     <link rel="stylesheet" href="/styles/main.css" />
   </head>
   <body>
-    <div id="app">
-      <main class="main-wrapper">
-        <div class="content-container">
-          <img
-            src="https://lf-coze-web-cdn.coze.cn/obj/eden-cn/lm-lgvj/ljhwZthlaukjlkulzlp/coze-coding/icon/coze-coding.gif"
-            alt="扣子编程 Logo"
-            class="logo-image"
-          />
-          <div>
-            <div class="text-container">
-              <h1 class="heading">
-                应用开发中
-              </h1>
-              <p class="description">
-                请稍后，页面即将呈现
-              </p>
-            </div>
+    <div class="page-container">
+      <!-- 顶部品牌区域 -->
+      <header class="brand-header">
+        <div class="brand-logo">51<span>Talk</span></div>
+      </header>
+
+      <!-- 主卡片 -->
+      <main class="main-card">
+        <!-- 提交前表单页面 -->
+        <div id="formPage">
+          <!-- Toki欢迎区域 -->
+          <div class="toki-section">
+            <img 
+              src="/public/toki-greeting.png" 
+              alt="Toki欢迎" 
+              class="toki-image"
+              onerror="this.style.display='none'"
+            />
+            <div class="toki-bubble">上传好评截图，领取香蕉币吧！</div>
           </div>
+
+          <!-- 页面标题与说明 -->
+          <h1 class="page-title">上传好评截图</h1>
+          <p class="page-description">
+            完成好评后，上传截图并填写订单ID，审核通过即可获得<span class="highlight">36,000香蕉币</span>。
+          </p>
+
+          <!-- 表单区域 -->
+          <form id="uploadForm" onsubmit="return false;">
+            <!-- 上传好评截图 -->
+            <div class="form-section">
+              <label class="form-label">
+                好评截图
+                <span class="required">*</span>
+              </label>
+              
+              <div class="upload-area" id="uploadArea" onclick="document.getElementById('fileInput').click()">
+                <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                  <polyline points="17 8 12 3 7 8"/>
+                  <line x1="12" y1="3" x2="12" y2="15"/>
+                </svg>
+                <div class="upload-text">点击上传好评截图</div>
+                <div class="upload-hint">支持JPG、PNG、HEIC格式，图片不超过10MB</div>
+                
+                <div class="upload-preview" id="uploadPreview">
+                  <img id="previewImage" src="" alt="预览" />
+                  <button type="button" class="remove-btn" onclick="removeImage(event)">×</button>
+                </div>
+              </div>
+              
+              <div class="upload-success-text" id="uploadSuccessText">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="20 6 9 17 4 12"/>
+                </svg>
+                截图上传成功
+              </div>
+              
+              <div class="error-message" id="uploadError">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10"/>
+                  <line x1="12" y1="8" x2="12" y2="12"/>
+                  <line x1="12" y1="16" x2="12.01" y2="16"/>
+                </svg>
+                请先上传好评截图
+              </div>
+              
+              <input 
+                type="file" 
+                id="fileInput" 
+                accept="image/jpeg,image/png,image/heic,image/heif" 
+                style="display: none"
+                onchange="handleFileSelect(event)"
+              />
+            </div>
+
+            <!-- 订单ID -->
+            <div class="form-section">
+              <label class="form-label">
+                订单ID
+                <span class="required">*</span>
+              </label>
+              
+              <div class="input-wrapper">
+                <input 
+                  type="text" 
+                  class="input-field" 
+                  id="orderIdInput"
+                  placeholder="请输入您的订单ID"
+                  oninput="handleOrderIdInput(event)"
+                />
+                <button type="button" class="input-clear" id="inputClear" onclick="clearOrderId()">×</button>
+              </div>
+              
+              <div class="input-hint">请在抖音订单详情中查看订单ID</div>
+              
+              <div class="error-message" id="orderIdError">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10"/>
+                  <line x1="12" y1="8" x2="12" y2="12"/>
+                  <line x1="12" y1="16" x2="12.01" y2="16"/>
+                </svg>
+                请输入订单ID
+              </div>
+            </div>
+
+            <!-- 提交按钮 -->
+            <button 
+              type="button" 
+              class="submit-btn" 
+              id="submitBtn"
+              disabled
+              onclick="handleSubmit()"
+            >
+              <span id="btnText">确认提交</span>
+              <span class="arrow" id="btnArrow">→</span>
+            </button>
+            
+            <div class="btn-hint">请确认截图和订单ID填写正确，提交后无需重复上传</div>
+          </form>
+
+          <!-- 隐私说明 -->
+          <div class="privacy-note">
+            您提交的信息仅用于本次活动审核及奖励发放
+          </div>
+        </div>
+
+        <!-- 提交成功页面 -->
+        <div class="success-page" id="successPage">
+          <img 
+            src="/public/toki-celebrate.png" 
+            alt="Toki庆祝" 
+            class="success-toki"
+            onerror="this.style.display='none'"
+          />
+          
+          <div class="success-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="20 6 9 17 4 12"/>
+            </svg>
+          </div>
+          
+          <h2 class="success-title">恭喜您，上传成功！</h2>
+          
+          <p class="success-description">
+            我们将在审核通过后的<span class="time-highlight">7个自然日内</span>，<br/>
+            为您的账户发放<span class="highlight">36,000香蕉币</span>。
+          </p>
+          
+          <p class="success-note">
+            香蕉币到账后，请前往51Talk账户中查看
+          </p>
+          
+          <button class="complete-btn" onclick="handleComplete()">
+            完成
+          </button>
         </div>
       </main>
     </div>
+
+    <!-- 飘动动画容器 -->
+    <div class="floating-elements" id="floatingElements"></div>
+
+    <script>
+      // 状态管理
+      let state = {
+        imageUploaded: false,
+        orderId: '',
+        isSubmitting: false
+      };
+
+      // 文件选择处理
+      function handleFileSelect(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        // 验证文件类型
+        const validTypes = ['image/jpeg', 'image/png', 'image/heic', 'image/heif'];
+        if (!validTypes.includes(file.type)) {
+          showError('uploadError', '请上传JPG、PNG或HEIC格式的图片');
+          return;
+        }
+
+        // 验证文件大小（10MB）
+        if (file.size > 10 * 1024 * 1024) {
+          showError('uploadError', '图片大小不能超过10MB');
+          return;
+        }
+
+        // 清除错误
+        hideError('uploadError');
+
+        // 预览图片
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          const preview = document.getElementById('uploadPreview');
+          const previewImage = document.getElementById('previewImage');
+          const uploadArea = document.getElementById('uploadArea');
+          const successText = document.getElementById('uploadSuccessText');
+
+          previewImage.src = e.target.result;
+          preview.style.display = 'block';
+          uploadArea.classList.add('success');
+          successText.classList.add('show');
+
+          state.imageUploaded = true;
+          updateSubmitButton();
+        };
+        reader.readAsDataURL(file);
+      }
+
+      // 移除图片
+      function removeImage(event) {
+        event.stopPropagation();
+        
+        const preview = document.getElementById('uploadPreview');
+        const uploadArea = document.getElementById('uploadArea');
+        const successText = document.getElementById('uploadSuccessText');
+        const fileInput = document.getElementById('fileInput');
+
+        preview.style.display = 'none';
+        uploadArea.classList.remove('success');
+        successText.classList.remove('show');
+        fileInput.value = '';
+
+        state.imageUploaded = false;
+        updateSubmitButton();
+      }
+
+      // 订单ID输入处理
+      function handleOrderIdInput(event) {
+        const value = event.target.value.trim();
+        state.orderId = value;
+
+        const clearBtn = document.getElementById('inputClear');
+        if (value.length > 0) {
+          clearBtn.classList.add('show');
+        } else {
+          clearBtn.classList.remove('show');
+        }
+
+        hideError('orderIdError');
+        updateSubmitButton();
+      }
+
+      // 清除订单ID
+      function clearOrderId() {
+        const input = document.getElementById('orderIdInput');
+        input.value = '';
+        state.orderId = '';
+        document.getElementById('inputClear').classList.remove('show');
+        updateSubmitButton();
+      }
+
+      // 更新提交按钮状态
+      function updateSubmitButton() {
+        const btn = document.getElementById('submitBtn');
+        if (state.imageUploaded && state.orderId.length > 0) {
+          btn.disabled = false;
+        } else {
+          btn.disabled = true;
+        }
+      }
+
+      // 显示错误
+      function showError(elementId, message) {
+        const element = document.getElementById(elementId);
+        element.textContent = message;
+        element.classList.add('show');
+      }
+
+      // 隐藏错误
+      function hideError(elementId) {
+        const element = document.getElementById(elementId);
+        element.classList.remove('show');
+      }
+
+      // 提交处理
+      async function handleSubmit() {
+        if (state.isSubmitting) return;
+
+        // 验证
+        if (!state.imageUploaded) {
+          showError('uploadError', '请先上传好评截图');
+          return;
+        }
+
+        if (!state.orderId) {
+          showError('orderIdError', '请输入订单ID');
+          return;
+        }
+
+        // 开始提交
+        state.isSubmitting = true;
+        const btn = document.getElementById('submitBtn');
+        const btnText = document.getElementById('btnText');
+        const btnArrow = document.getElementById('btnArrow');
+
+        btn.disabled = true;
+        btnText.textContent = '正在提交…';
+        btnArrow.innerHTML = '<div class="loading-spinner"></div>';
+
+        // 模拟提交（实际项目中替换为真实API调用）
+        try {
+          await simulateSubmit();
+          
+          // 提交成功
+          showSuccessPage();
+        } catch (error) {
+          // 提交失败
+          btnText.textContent = '确认提交';
+          btnArrow.textContent = '→';
+          btn.disabled = false;
+          state.isSubmitting = false;
+          
+          alert('提交失败，请重试');
+        }
+      }
+
+      // 模拟提交（实际项目中替换为真实API）
+      function simulateSubmit() {
+        return new Promise((resolve) => {
+          setTimeout(resolve, 1500);
+        });
+      }
+
+      // 显示成功页面
+      function showSuccessPage() {
+        const formPage = document.getElementById('formPage');
+        const successPage = document.getElementById('successPage');
+
+        formPage.style.display = 'none';
+        successPage.classList.add('show');
+
+        // 创建飘动动画
+        createFloatingAnimation();
+      }
+
+      // 创建飘动动画
+      function createFloatingAnimation() {
+        const container = document.getElementById('floatingElements');
+        const items = ['⭐', '', '✨', '🎉'];
+        
+        for (let i = 0; i < 8; i++) {
+          setTimeout(() => {
+            const item = document.createElement('div');
+            item.className = 'floating-item';
+            item.textContent = items[Math.floor(Math.random() * items.length)];
+            item.style.left = Math.random() * 100 + '%';
+            item.style.bottom = '20%';
+            container.appendChild(item);
+
+            // 动画结束后移除
+            setTimeout(() => {
+              item.remove();
+            }, 1000);
+          }, i * 150);
+        }
+      }
+
+      // 完成按钮处理
+      function handleComplete() {
+        // 关闭页面或返回
+        if (window.history.length > 1) {
+          window.history.back();
+        } else {
+          // 如果在微信中，尝试关闭
+          if (typeof WeixinJSBridge !== 'undefined') {
+            WeixinJSBridge.call('closeWindow');
+          } else {
+            window.close();
+          }
+        }
+      }
+
+      // 页面离开提示
+      window.addEventListener('beforeunload', function(e) {
+        if (state.imageUploaded || state.orderId) {
+          e.preventDefault();
+          e.returnValue = '';
+        }
+      });
+    </script>
   </body>
 </html>
