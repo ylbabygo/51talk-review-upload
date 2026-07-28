@@ -31,27 +31,33 @@ const server = http.createServer((req, res) => {
     res.end('Forbidden');
     return;
   }
-  
+
   const ext = path.extname(filePath).toLowerCase();
   const contentType = MIME_TYPES[ext] || 'application/octet-stream';
 
   fs.readFile(filePath, (err, data) => {
     if (err) {
-      // 如果是HTML文件请求失败，返回index.html（SPA支持）
-      if (ext === '.html' || !ext) {
-        fs.readFile(path.join(PUBLIC_DIR, 'index.html'), (err2, data2) => {
-          if (err2) {
-            res.writeHead(404, { 'Content-Type': 'text/plain' });
-            res.end('Not Found');
-            return;
-          }
-          res.writeHead(200, { 'Content-Type': 'text/html' });
-          res.end(data2);
-        });
-      } else {
+      if (err.code === 'ENOENT') {
+        // 尝试返回 index.html（SPA 支持）
+        if (!urlPath.includes('.')) {
+          filePath = path.join(PUBLIC_DIR, 'index.html');
+          fs.readFile(filePath, (err2, data2) => {
+            if (err2) {
+              res.writeHead(500, { 'Content-Type': 'text/plain' });
+              res.end('Internal Server Error');
+              return;
+            }
+            res.writeHead(200, { 'Content-Type': 'text/html' });
+            res.end(data2);
+          });
+          return;
+        }
         res.writeHead(404, { 'Content-Type': 'text/plain' });
         res.end('Not Found');
+        return;
       }
+      res.writeHead(500, { 'Content-Type': 'text/plain' });
+      res.end('Internal Server Error');
       return;
     }
     
@@ -63,9 +69,15 @@ const server = http.createServer((req, res) => {
   });
 });
 
+server.on('error', (err) => {
+  console.error('Server error:', err);
+  process.exit(1);
+});
+
 server.listen(PORT, '0.0.0.0', () => {
   console.log(`Server running at http://0.0.0.0:${PORT}`);
   console.log(`Serving files from: ${PUBLIC_DIR}`);
+  console.log(`Environment: DEPLOY_RUN_PORT=${process.env.DEPLOY_RUN_PORT}, PORT=${process.env.PORT}`);
 });
 
 // 优雅关闭
@@ -83,4 +95,15 @@ process.on('SIGINT', () => {
     console.log('Server closed');
     process.exit(0);
   });
+});
+
+// 保持进程运行
+process.on('uncaughtException', (err) => {
+  console.error('Uncaught exception:', err);
+  process.exit(1);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('Unhandled rejection at:', promise, 'reason:', reason);
+  process.exit(1);
 });
