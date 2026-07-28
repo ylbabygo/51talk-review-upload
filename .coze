@@ -7,7 +7,11 @@ version = "0.0.32"
 appliedPatches = [ ]
 
 [dev]
-build = [ ]
+build = [
+  "sh",
+  "-c",
+  "echo 'Building...'"
+]
 run = [
   "sh",
   "-c",
@@ -15,7 +19,11 @@ run = [
 ]
 
 [deploy]
-build = [ ]
+build = [
+  "sh",
+  "-c",
+  "echo 'Deploy build...'"
+]
 run = [
   "sh",
   "-c",
