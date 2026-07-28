@@ -144,13 +144,11 @@ body {
 .toki-bubble {
   background: linear-gradient(135deg, #FFF9C4 0%, #FFEB3C 100%);
   color: #4F46E5;
-  padding: 10px 20px;
-  border-radius: 24px;
-  font-size: 14px;
-  font-weight: 600;
+  padding: 14px 28px;
+  border-radius: 28px;
   display: inline-block;
   margin-top: 12px;
-  box-shadow: 0 4px 12px rgba(255, 235, 60, 0.3);
+  box-shadow: 0 4px 16px rgba(255, 235, 60, 0.4);
   position: relative;
   animation: bubblePop 500ms ease-out 500ms both;
 }
@@ -158,13 +156,29 @@ body {
 .toki-bubble::before {
   content: '';
   position: absolute;
-  top: -6px;
+  top: -8px;
   left: 50%;
   transform: translateX(-50%);
-  width: 12px;
-  height: 12px;
+  width: 14px;
+  height: 14px;
   background: #FFEB3C;
   border-radius: 50%;
+}
+
+.bubble-main {
+  display: block;
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 2px;
+  color: #4F46E5;
+  letter-spacing: 0.5px;
+}
+
+.bubble-sub {
+  display: block;
+  font-size: 15px;
+  font-weight: 500;
+  color: #6366F1;
 }
 
 @keyframes bubblePop {
@@ -178,17 +192,7 @@ body {
   }
 }
 
-/* 页面标题与说明 */
-.page-title {
-  font-size: 26px;
-  font-weight: 700;
-  color: #1F2937;
-  text-align: center;
-  margin-bottom: 12px;
-  animation: fadeIn 600ms ease-out 400ms both;
-  letter-spacing: -0.5px;
-}
-
+/* 页面说明 */
 .page-description {
   font-size: 14px;
   color: #6B7280;
@@ -252,10 +256,10 @@ body {
 
 /* 上传区域 */
 .upload-area {
-  border: 2px dashed rgba(79, 70, 229, 0.4);
-  background: linear-gradient(135deg, rgba(79, 70, 229, 0.02) 0%, rgba(79, 70, 229, 0.05) 100%);
+  border: 2px dashed rgba(79, 70, 229, 0.35);
+  background: linear-gradient(135deg, rgba(79, 70, 229, 0.02) 0%, rgba(99, 102, 241, 0.04) 100%);
   border-radius: 20px;
-  height: 190px;
+  height: 200px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -273,15 +277,15 @@ body {
   left: 0;
   right: 0;
   bottom: 0;
-  background: linear-gradient(135deg, rgba(79, 70, 229, 0.05) 0%, rgba(124, 58, 237, 0.05) 100%);
+  background: radial-gradient(circle at center, rgba(79, 70, 229, 0.08) 0%, transparent 70%);
   opacity: 0;
   transition: opacity 0.3s ease;
 }
 
 .upload-area:hover {
-  border-color: rgba(79, 70, 229, 0.7);
-  transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(79, 70, 229, 0.15);
+  border-color: rgba(79, 70, 229, 0.6);
+  transform: translateY(-3px);
+  box-shadow: 0 12px 32px rgba(79, 70, 229, 0.18);
 }
 
 .upload-area:hover::before {
@@ -294,7 +298,7 @@ body {
 
 .upload-area.success {
   border-color: #16A34A;
-  background: linear-gradient(135deg, rgba(22, 163, 74, 0.02) 0%, rgba(22, 163, 74, 0.05) 100%);
+  background: linear-gradient(135deg, rgba(22, 163, 74, 0.02) 0%, rgba(22, 163, 74, 0.06) 100%);
   animation: successPulse 500ms ease-out;
 }
 
@@ -345,16 +349,16 @@ body {
   gap: 6px;
   margin-top: 8px;
   padding: 8px 12px;
-  background: rgba(255, 235, 60, 0.15);
+  background: rgba(239, 68, 68, 0.08);
   border-radius: 8px;
   font-size: 12px;
-  color: #4F46E5;
+  color: #EF4444;
   font-weight: 500;
 }
 
 .upload-requirement svg {
   flex-shrink: 0;
-  color: #FFEB3C;
+  color: #EF4444;
 }
 
 .upload-preview {
