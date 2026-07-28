@@ -33,7 +33,7 @@
 ## 开发命令
 ```bash
 # 启动开发服务器
-python -m http.server 5000 --bind 0.0.0.0
+npx serve -l 5000 -s .
 
 # 访问页面
 http://localhost:5000
