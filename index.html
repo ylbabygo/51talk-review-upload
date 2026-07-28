@@ -11,6 +11,9 @@
     <div class="page-container">
       <!-- 主卡片 -->
       <main class="main-card">
+        <!-- 装饰星星 -->
+        <div class="decorative-stars">✨</div>
+
         <!-- 提交前表单页面 -->
         <div id="formPage">
           <!-- 品牌Logo -->
@@ -349,22 +352,23 @@
       // 创建飘动动画
       function createFloatingAnimation() {
         const container = document.getElementById('floatingElements');
-        const items = ['⭐', '', '✨', '🎉'];
+        const items = ['⭐', '✨', '', '', '🌟', '💫'];
         
-        for (let i = 0; i < 8; i++) {
+        for (let i = 0; i < 12; i++) {
           setTimeout(() => {
             const item = document.createElement('div');
             item.className = 'floating-item';
             item.textContent = items[Math.floor(Math.random() * items.length)];
-            item.style.left = Math.random() * 100 + '%';
-            item.style.bottom = '20%';
+            item.style.left = (10 + Math.random() * 80) + '%';
+            item.style.bottom = '10%';
+            item.style.animationDuration = (1 + Math.random() * 0.5) + 's';
             container.appendChild(item);
 
             // 动画结束后移除
             setTimeout(() => {
               item.remove();
-            }, 1000);
-          }, i * 150);
+            }, 1500);
+          }, i * 100);
         }
       }
 
