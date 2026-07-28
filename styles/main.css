@@ -32,14 +32,14 @@ body {
   flex-direction: column;
 }
 
-/* 顶部品牌区域 */
-.brand-header {
-  padding: 20px 0;
+/* 卡片内Logo */
+.card-logo {
   text-align: left;
+  margin-bottom: 16px;
 }
 
-.brand-logo-img {
-  width: 88px;
+.card-logo-img {
+  width: 80px;
   height: auto;
   display: block;
 }
