@@ -381,10 +381,39 @@ const server = http.createServer(async (req, res) => {
       return;
     }
     
+    // 管理后台API - 获取提交数据（支持搜索）
+    if (urlPath === '/api/submissions' && req.method === 'GET') {
+      try {
+        const data = readData();
+        const urlObj = new URL(req.url, `http://${req.headers.host}`);
+        const search = urlObj.searchParams.get('search') || '';
+        
+        let submissions = data.submissions;
+        
+        // 搜索过滤
+        if (search) {
+          const searchLower = search.toLowerCase();
+          submissions = submissions.filter(item => 
+            (item.phone && item.phone.includes(search)) ||
+            (item.orderId && item.orderId.includes(search)) ||
+            (item.comment && item.comment.toLowerCase().includes(searchLower))
+          );
+        }
+        
+        sendJSON(res, 200, { 
+          success: true, 
+          data: submissions, 
+          total: submissions.length 
+        });
+      } catch (err) {
+        console.error('获取数据失败:', err);
+        sendJSON(res, 500, { success: false, message: '获取数据失败' });
+      }
+      return;
+    }
+    
     // 管理后台API - 获取提交数据
-    console.log('Checking /api/admin/submissions:', urlPath === '/api/admin/submissions', 'Method:', req.method);
     if (urlPath === '/api/admin/submissions' && req.method === 'GET') {
-      console.log('Route matched!');
       try {
         const data = readData();
         sendJSON(res, 200, { success: true, data: data.submissions, total: data.submissions.length });
