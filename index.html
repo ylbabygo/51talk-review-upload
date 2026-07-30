@@ -222,6 +222,7 @@
       // 状态管理
       let state = {
         imageUploaded: false,
+        imageData: null,
         orderId: '',
         phone: '',
         isSubmitting: false
@@ -470,7 +471,7 @@
           const result = await response.json();
 
           if (!response.ok) {
-            throw new Error(result.error || '提交失败');
+            throw new Error(result.message || result.error || '提交失败');
           }
 
           // 提交成功
