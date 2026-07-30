@@ -120,6 +120,20 @@
       opacity: 0.8;
     }
 
+    .delete-btn {
+      background: #EF4444;
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 13px;
+    }
+
+    .delete-btn:hover {
+      background: #DC2626;
+    }
+
     .empty-state {
       text-align: center;
       padding: 60px 20px;
@@ -265,6 +279,7 @@
                 <th>手机号</th>
                 <th>截图</th>
                 <th>提交时间</th>
+                <th>操作</th>
               </tr>
             </thead>
             <tbody>
@@ -281,6 +296,7 @@
               <td>${item.phone}</td>
               <td>${hasImage === 'yes' ? `<img class="image-thumb" src="${imageSrc}" onclick="showImage('${imageSrc}')" />` : '<span style="color:#999;font-size:12px;">无图片</span>'}</td>
               <td>${time}</td>
+              <td><button class="delete-btn" onclick="deleteItem('${item.id}')">删除</button></td>
             </tr>
           `;
         });
@@ -319,6 +335,33 @@
       link.href = URL.createObjectURL(blob);
       link.download = `51talk_submissions_${new Date().toISOString().slice(0,10)}.csv`;
       link.click();
+    }
+
+    async function deleteItem(id) {
+      if (!confirm('确定要删除这条数据吗？删除后无法恢复。')) {
+        return;
+      }
+
+      try {
+        const response = await fetch('/api/admin/delete', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ id }),
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+          alert('删除成功');
+          loadData(); // 重新加载数据
+        } else {
+          alert('删除失败：' + result.message);
+        }
+      } catch (err) {
+        alert('删除失败：' + err.message);
+      }
     }
 
     // 页面加载时获取数据

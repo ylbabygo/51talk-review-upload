@@ -431,6 +431,34 @@ const server = http.createServer(async (req, res) => {
       return;
     }
     
+    // 管理后台API - 删除提交数据
+    if (urlPath === '/api/admin/delete' && req.method === 'POST') {
+      try {
+        const body = await parseBody(req);
+        const { id } = body;
+        
+        if (!id) {
+          return sendJSON(res, 400, { success: false, message: '缺少ID参数' });
+        }
+        
+        const data = readData();
+        const originalLength = data.submissions.length;
+        data.submissions = data.submissions.filter(item => item.id !== id);
+        
+        if (data.submissions.length === originalLength) {
+          return sendJSON(res, 404, { success: false, message: '数据不存在' });
+        }
+        
+        writeData(data);
+        console.log('[api] delete success:', id);
+        sendJSON(res, 200, { success: true, message: '删除成功' });
+      } catch (err) {
+        console.error('[api] delete error:', err);
+        sendJSON(res, 500, { success: false, message: '删除失败' });
+      }
+      return;
+    }
+    
     sendJSON(res, 404, { success: false, message: 'API not found' });
     return;
   }
