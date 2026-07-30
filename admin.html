@@ -272,12 +272,14 @@
 
         allData.forEach((item, index) => {
           const time = new Date(item.submittedAt).toLocaleString('zh-CN');
+          const imageSrc = item.imageUrl || '';
+          const hasImage = item.imageUrl ? 'yes' : 'no';
           html += `
             <tr>
               <td>${index + 1}</td>
               <td>${item.orderId}</td>
               <td>${item.phone}</td>
-              <td><img class="image-thumb" src="${item.imageUrl}" onclick="showImage('${item.imageUrl}')" /></td>
+              <td>${hasImage === 'yes' ? `<img class="image-thumb" src="${imageSrc}" onclick="showImage('${imageSrc}')" />` : '<span style="color:#999;font-size:12px;">无图片</span>'}</td>
               <td>${time}</td>
             </tr>
           `;
