@@ -354,7 +354,9 @@ const server = http.createServer(async (req, res) => {
         sendJSON(res, 200, { success: true, message: '提交成功' });
       } catch (err) {
         console.error('[api] submit error:', err);
-        sendJSON(res, 500, { success: false, message: '提交失败' });
+        console.error('[api] submit error stack:', err.stack);
+        console.error('[api] submit error body:', JSON.stringify(body || {}));
+        sendJSON(res, 500, { success: false, message: '提交失败：' + err.message });
       }
       return;
     }
