@@ -249,11 +249,19 @@
         // 清除错误
         hideError('uploadError');
 
+        // 显示压缩提示
+        const uploadArea = document.getElementById('uploadArea');
+        const uploadText = document.getElementById('uploadText');
+        const originalText = uploadText.innerHTML;
+        uploadText.innerHTML = '<div class="loading-spinner" style="display:inline-block;width:20px;height:20px;border:2px solid rgba(79,70,229,0.3);border-top-color:#4F46E5;border-radius:50%;animation:spin 0.8s linear infinite;vertical-align:middle;margin-right:8px;"></div>正在处理图片...';
+
         // 压缩并预览图片
         compressImage(file, function(compressedDataUrl) {
+          // 恢复原始文本
+          uploadText.innerHTML = originalText;
+
           const preview = document.getElementById('uploadPreview');
           const previewImage = document.getElementById('previewImage');
-          const uploadArea = document.getElementById('uploadArea');
           const successText = document.getElementById('uploadSuccessText');
 
           previewImage.src = compressedDataUrl;
@@ -273,35 +281,50 @@
         reader.onload = function(e) {
           const img = new Image();
           img.onload = function() {
-            // 创建Canvas
-            const canvas = document.createElement('canvas');
-            const ctx = canvas.getContext('2d');
+            try {
+              // 创建Canvas
+              const canvas = document.createElement('canvas');
+              const ctx = canvas.getContext('2d');
 
-            // 计算压缩后的尺寸（最大宽度1200px）
-            const maxWidth = 1200;
-            const maxHeight = 1200;
-            let width = img.width;
-            let height = img.height;
+              // 计算压缩后的尺寸（最大宽度1200px）
+              const maxWidth = 1200;
+              const maxHeight = 1200;
+              let width = img.width;
+              let height = img.height;
 
-            if (width > height && width > maxWidth) {
-              height = (height * maxWidth) / width;
-              width = maxWidth;
-            } else if (height > maxHeight) {
-              width = (width * maxHeight) / height;
-              height = maxHeight;
+              if (width > height && width > maxWidth) {
+                height = (height * maxWidth) / width;
+                width = maxWidth;
+              } else if (height > maxHeight) {
+                width = (width * maxHeight) / height;
+                height = maxHeight;
+              }
+
+              canvas.width = width;
+              canvas.height = height;
+
+              // 绘制图片
+              ctx.drawImage(img, 0, 0, width, height);
+
+              // 压缩为JPEG，质量80%
+              const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.8);
+              callback(compressedDataUrl);
+            } catch (error) {
+              console.error('图片压缩失败:', error);
+              // 压缩失败，使用原图
+              callback(e.target.result);
             }
-
-            canvas.width = width;
-            canvas.height = height;
-
-            // 绘制图片
-            ctx.drawImage(img, 0, 0, width, height);
-
-            // 压缩为JPEG，质量80%
-            const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.8);
-            callback(compressedDataUrl);
+          };
+          img.onerror = function() {
+            console.error('图片加载失败');
+            // 图片加载失败，使用原图
+            callback(e.target.result);
           };
           img.src = e.target.result;
+        };
+        reader.onerror = function() {
+          console.error('文件读取失败');
+          showError('uploadError', '图片读取失败，请重新选择');
         };
         reader.readAsDataURL(file);
       }
@@ -492,7 +515,10 @@
         btnArrow.innerHTML = '<div class="loading-spinner"></div>';
 
         try {
-          // 调用真实API提交
+          // 调用真实API提交（带超时处理）
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 30000); // 30秒超时
+
           const response = await fetch('/api/submit', {
             method: 'POST',
             headers: {
@@ -503,8 +529,10 @@
               phone: state.phone,
               imageData: state.imageData, // base64图片数据
             }),
+            signal: controller.signal,
           });
 
+          clearTimeout(timeoutId);
           const result = await response.json();
 
           if (!response.ok) {
@@ -521,7 +549,9 @@
           state.isSubmitting = false;
 
           // 显示错误信息
-          if (error.message.includes('已提交') || error.message.includes('重复')) {
+          if (error.name === 'AbortError') {
+            alert('提交超时，请检查网络连接后重试');
+          } else if (error.message.includes('已提交') || error.message.includes('重复')) {
             alert(error.message);
           } else {
             alert('提交失败：' + error.message);
