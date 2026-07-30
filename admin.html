@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>51Talk - 数据管理后台</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background: #f5f5f5;
+      color: #333;
+    }
+
+    .header {
+      background: #4F46E5;
+      color: white;
+      padding: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .header h1 {
+      font-size: 20px;
+      font-weight: 600;
+    }
+
+    .header .stats {
+      font-size: 14px;
+      opacity: 0.9;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    .filter-bar {
+      background: white;
+      padding: 16px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .filter-bar input,
+    .filter-bar button {
+      padding: 8px 12px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      font-size: 14px;
+    }
+
+    .filter-bar input {
+      flex: 1;
+      min-width: 200px;
+    }
+
+    .filter-bar button {
+      background: #4F46E5;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+
+    .filter-bar button:hover {
+      background: #4338ca;
+    }
+
+    .table-container {
+      background: white;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    th, td {
+      padding: 12px 16px;
+      text-align: left;
+      border-bottom: 1px solid #eee;
+    }
+
+    th {
+      background: #f9fafb;
+      font-weight: 600;
+      font-size: 14px;
+      color: #666;
+    }
+
+    td {
+      font-size: 14px;
+    }
+
+    tr:hover {
+      background: #f9fafb;
+    }
+
+    .image-thumb {
+      width: 60px;
+      height: 60px;
+      object-fit: cover;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .image-thumb:hover {
+      opacity: 0.8;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: #999;
+    }
+
+    .empty-state svg {
+      width: 64px;
+      height: 64px;
+      margin-bottom: 16px;
+      opacity: 0.5;
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.8);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .modal.active {
+      display: flex;
+    }
+
+    .modal img {
+      max-width: 90%;
+      max-height: 90%;
+      border-radius: 8px;
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      color: white;
+      font-size: 32px;
+      cursor: pointer;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 40px;
+      color: #666;
+    }
+
+    .error {
+      text-align: center;
+      padding: 40px;
+      color: #ef4444;
+    }
+
+    @media (max-width: 768px) {
+      .filter-bar {
+        flex-direction: column;
+      }
+
+      .filter-bar input {
+        min-width: 100%;
+      }
+
+      table {
+        font-size: 12px;
+      }
+
+      th, td {
+        padding: 8px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>51Talk 好评截图管理后台</h1>
+    <div class="stats" id="stats">加载中...</div>
+  </div>
+
+  <div class="container">
+    <div class="filter-bar">
+      <input type="text" id="searchInput" placeholder="搜索订单ID或手机号..." />
+      <button onclick="loadData()">搜索</button>
+      <button onclick="exportData()">导出数据</button>
+    </div>
+
+    <div class="table-container">
+      <div id="content">
+        <div class="loading">加载中...</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="imageModal" onclick="closeModal()">
+    <span class="modal-close">&times;</span>
+    <img id="modalImage" src="" alt="预览" />
+  </div>
+
+  <script>
+    let allData = [];
+
+    async function loadData() {
+      const search = document.getElementById('searchInput').value.trim();
+      const content = document.getElementById('content');
+      const stats = document.getElementById('stats');
+
+      content.innerHTML = '<div class="loading">加载中...</div>';
+
+      try {
+        const url = search ? `/api/submissions?search=${encodeURIComponent(search)}` : '/api/submissions';
+        const response = await fetch(url);
+        const result = await response.json();
+
+        if (!result.success) {
+          content.innerHTML = '<div class="error">加载失败</div>';
+          return;
+        }
+
+        allData = result.data;
+        stats.textContent = `共 ${result.total} 条记录`;
+
+        if (allData.length === 0) {
+          content.innerHTML = `
+            <div class="empty-state">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+              </svg>
+              <p>暂无数据</p>
+            </div>
+          `;
+          return;
+        }
+
+        let html = `
+          <table>
+            <thead>
+              <tr>
+                <th>序号</th>
+                <th>订单ID</th>
+                <th>手机号</th>
+                <th>截图</th>
+                <th>提交时间</th>
+              </tr>
+            </thead>
+            <tbody>
+        `;
+
+        allData.forEach((item, index) => {
+          const time = new Date(item.submittedAt).toLocaleString('zh-CN');
+          html += `
+            <tr>
+              <td>${index + 1}</td>
+              <td>${item.orderId}</td>
+              <td>${item.phone}</td>
+              <td><img class="image-thumb" src="${item.imageUrl}" onclick="showImage('${item.imageUrl}')" /></td>
+              <td>${time}</td>
+            </tr>
+          `;
+        });
+
+        html += '</tbody></table>';
+        content.innerHTML = html;
+
+      } catch (err) {
+        content.innerHTML = '<div class="error">加载失败：' + err.message + '</div>';
+      }
+    }
+
+    function showImage(url) {
+      document.getElementById('modalImage').src = url;
+      document.getElementById('imageModal').classList.add('active');
+    }
+
+    function closeModal() {
+      document.getElementById('imageModal').classList.remove('active');
+    }
+
+    function exportData() {
+      if (allData.length === 0) {
+        alert('暂无数据可导出');
+        return;
+      }
+
+      let csv = '订单ID,手机号,提交时间\n';
+      allData.forEach(item => {
+        const time = new Date(item.submittedAt).toLocaleString('zh-CN');
+        csv += `${item.orderId},${item.phone},${time}\n`;
+      });
+
+      const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = `51talk_submissions_${new Date().toISOString().slice(0,10)}.csv`;
+      link.click();
+    }
+
+    // 页面加载时获取数据
+    loadData();
+
+    // 回车搜索
+    document.getElementById('searchInput').addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') loadData();
+    });
+  </script>
+</body>
+</html>

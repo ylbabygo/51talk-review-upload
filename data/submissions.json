@@ -1,0 +1,13 @@
+{
+  "submissions": [
+    {
+      "id": "1785403896000",
+      "phone": "13800138000",
+      "orderId": "6912345678901234567",
+      "imageData": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==",
+      "imageUrl": "/data/images/1785403896000.jpg",
+      "status": "pending",
+      "submittedAt": "2026-07-30T09:31:36.000Z"
+    }
+  ]
+}

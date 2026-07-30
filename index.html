@@ -63,7 +63,7 @@
                     <line x1="12" y1="16" x2="12" y2="12"/>
                     <line x1="12" y1="8" x2="12.01" y2="8"/>
                   </svg>
-                  <span class="requirement-text">截图需包含<span class="requirement-highlight">10字以上</span>评价内容+<span class="requirement-highlight">至少1张图片</span></span>
+                  <span class="requirement-text">截图需包含<span class="requirement-highlight">五星好评</span>+<span class="requirement-highlight">10字以上</span>评价内容+<span class="requirement-highlight">至少1张图片</span></span>
                 </div>
                 
                 <div class="upload-preview" id="uploadPreview">
@@ -129,6 +129,38 @@
               </div>
             </div>
 
+            <!-- 报名手机号 -->
+            <div class="form-section">
+              <label class="form-label">
+                报名手机号
+                <span class="required">*</span>
+              </label>
+              
+              <div class="input-wrapper">
+                <input 
+                  type="tel" 
+                  class="input-field" 
+                  id="phoneInput"
+                  placeholder="请输入报名手机号"
+                  inputmode="numeric"
+                  maxlength="11"
+                  oninput="handlePhoneInput(event)"
+                />
+                <button type="button" class="input-clear" id="phoneClear" onclick="clearPhone()">×</button>
+              </div>
+              
+              <div class="input-hint">请填写报名课程时使用的手机号</div>
+              
+              <div class="error-message" id="phoneError">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10"/>
+                  <line x1="12" y1="8" x2="12" y2="12"/>
+                  <line x1="12" y1="16" x2="12.01" y2="16"/>
+                </svg>
+                <span id="phoneErrorText">请输入手机号</span>
+              </div>
+            </div>
+
             <!-- 提交按钮 -->
             <button 
               type="button" 
@@ -191,6 +223,7 @@
       let state = {
         imageUploaded: false,
         orderId: '',
+        phone: '',
         isSubmitting: false
       };
 
@@ -295,13 +328,58 @@
         updateSubmitButton();
       }
 
+      // 处理手机号输入
+      function handlePhoneInput(event) {
+        let value = event.target.value.replace(/[^0-9]/g, '');
+        if (value.length > 11) {
+          value = value.substring(0, 11);
+        }
+        event.target.value = value;
+        state.phone = value;
+
+        const clearBtn = document.getElementById('phoneClear');
+        if (value.length > 0) {
+          clearBtn.classList.add('show');
+        } else {
+          clearBtn.classList.remove('show');
+        }
+
+        // 验证手机号格式：11位数字，1开头
+        if (value.length > 0) {
+          if (!value.startsWith('1')) {
+            showError('phoneError', '手机号必须以1开头');
+          } else if (value.length < 11) {
+            hideError('phoneError');
+          } else if (value.length === 11) {
+            hideError('phoneError');
+          } else {
+            hideError('phoneError');
+          }
+        } else {
+          hideError('phoneError');
+        }
+        
+        updateSubmitButton();
+      }
+
+      // 清除手机号
+      function clearPhone() {
+        const input = document.getElementById('phoneInput');
+        input.value = '';
+        state.phone = '';
+        document.getElementById('phoneClear').classList.remove('show');
+        updateSubmitButton();
+      }
+
       // 更新提交按钮状态
       function updateSubmitButton() {
         const btn = document.getElementById('submitBtn');
         // 订单ID必须是69开头的19位数字
         const isOrderIdValid = state.orderId.length === 19 && state.orderId.startsWith('69');
+        // 手机号必须是11位数字，1开头
+        const isPhoneValid = state.phone.length === 11 && state.phone.startsWith('1');
         
-        if (state.imageUploaded && isOrderIdValid) {
+        if (state.imageUploaded && isOrderIdValid && isPhoneValid) {
           btn.disabled = false;
         } else {
           btn.disabled = true;
@@ -347,6 +425,22 @@
           return;
         }
 
+        if (!state.phone) {
+          showError('phoneError', '请输入报名手机号');
+          return;
+        }
+
+        // 验证手机号格式：11位数字，1开头
+        if (!state.phone.startsWith('1')) {
+          showError('phoneError', '手机号必须以1开头');
+          return;
+        }
+
+        if (state.phone.length !== 11) {
+          showError('phoneError', '手机号必须是11位数字');
+          return;
+        }
+
         // 开始提交
         state.isSubmitting = true;
         const btn = document.getElementById('submitBtn');
@@ -357,10 +451,26 @@
         btnText.textContent = '正在提交…';
         btnArrow.innerHTML = '<div class="loading-spinner"></div>';
 
-        // 模拟提交（实际项目中替换为真实API调用）
         try {
-          await simulateSubmit();
-          
+          // 调用真实API提交
+          const response = await fetch('/api/submit', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              orderId: state.orderId,
+              phone: state.phone,
+              imageData: state.imageData, // base64图片数据
+            }),
+          });
+
+          const result = await response.json();
+
+          if (!response.ok) {
+            throw new Error(result.error || '提交失败');
+          }
+
           // 提交成功
           showSuccessPage();
         } catch (error) {
@@ -369,16 +479,14 @@
           btnArrow.textContent = '→';
           btn.disabled = false;
           state.isSubmitting = false;
-          
-          alert('提交失败，请重试');
-        }
-      }
 
-      // 模拟提交（实际项目中替换为真实API）
-      function simulateSubmit() {
-        return new Promise((resolve) => {
-          setTimeout(resolve, 1500);
-        });
+          // 显示错误信息
+          if (error.message.includes('已提交') || error.message.includes('重复')) {
+            alert(error.message);
+          } else {
+            alert('提交失败：' + error.message);
+          }
+        }
       }
 
       // 显示成功页面
