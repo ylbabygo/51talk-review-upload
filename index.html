@@ -262,6 +262,7 @@
           successText.classList.add('show');
 
           state.imageUploaded = true;
+          state.imageData = e.target.result; // 保存base64图片数据
           updateSubmitButton();
         };
         reader.readAsDataURL(file);
@@ -282,6 +283,7 @@
         fileInput.value = '';
 
         state.imageUploaded = false;
+        state.imageData = null; // 清除图片数据
         updateSubmitButton();
       }
 
