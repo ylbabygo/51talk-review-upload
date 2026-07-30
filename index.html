@@ -515,41 +515,73 @@
         btnArrow.innerHTML = '<div class="loading-spinner"></div>';
 
         try {
+          // 调试日志
+          console.log('[submit] 开始提交，订单ID:', state.orderId, '手机号:', state.phone, '图片数据长度:', state.imageData ? state.imageData.length : 0);
+
           // 调用真实API提交（带超时处理）
-          const controller = new AbortController();
-          const timeoutId = setTimeout(() => controller.abort(), 30000); // 30秒超时
+          let timeoutId;
+          let fetchPromise;
 
-          const response = await fetch('/api/submit', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              orderId: state.orderId,
-              phone: state.phone,
-              imageData: state.imageData, // base64图片数据
-            }),
-            signal: controller.signal,
-          });
+          // 兼容微信浏览器（可能不支持AbortController）
+          if (typeof AbortController !== 'undefined') {
+            const controller = new AbortController();
+            timeoutId = setTimeout(() => controller.abort(), 30000); // 30秒超时
 
+            fetchPromise = fetch('/api/submit', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                orderId: state.orderId,
+                phone: state.phone,
+                imageData: state.imageData, // base64图片数据
+              }),
+              signal: controller.signal,
+            });
+          } else {
+            // 降级方案：不使用AbortController
+            fetchPromise = fetch('/api/submit', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                orderId: state.orderId,
+                phone: state.phone,
+                imageData: state.imageData, // base64图片数据
+              }),
+            });
+
+            // 手动超时处理
+            timeoutId = setTimeout(() => {
+              throw new Error('提交超时');
+            }, 30000);
+          }
+
+          const response = await fetchPromise;
           clearTimeout(timeoutId);
           const result = await response.json();
+
+          console.log('[submit] 响应状态:', response.status, '响应结果:', result);
 
           if (!response.ok) {
             throw new Error(result.message || result.error || '提交失败');
           }
 
           // 提交成功
+          console.log('[submit] 提交成功');
           showSuccessPage();
         } catch (error) {
           // 提交失败
+          console.error('[submit] 提交失败:', error);
           btnText.textContent = '确认提交';
           btnArrow.textContent = '→';
           btn.disabled = false;
           state.isSubmitting = false;
 
           // 显示错误信息
-          if (error.name === 'AbortError') {
+          if (error.name === 'AbortError' || error.message === '提交超时') {
             alert('提交超时，请检查网络连接后重试');
           } else if (error.message.includes('已提交') || error.message.includes('重复')) {
             alert(error.message);
