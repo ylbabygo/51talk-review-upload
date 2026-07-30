@@ -290,18 +290,22 @@ const server = http.createServer(async (req, res) => {
     if (urlPath === '/api/submit' && req.method === 'POST') {
       try {
         const body = await parseBody(req);
+        console.log('[api] submit body:', JSON.stringify(body));
         const { phone, orderId, imageData } = body;
         
         // 验证
         if (!phone || !orderId) {
+          console.log('[api] submit validation failed: missing phone or orderId');
           return sendJSON(res, 400, { success: false, message: '请填写完整信息' });
         }
         
         if (phone.length !== 11 || !phone.startsWith('1')) {
+          console.log('[api] submit validation failed: invalid phone', phone);
           return sendJSON(res, 400, { success: false, message: '手机号格式错误' });
         }
         
         if (orderId.length !== 19 || !orderId.startsWith('69')) {
+          console.log('[api] submit validation failed: invalid orderId', orderId);
           return sendJSON(res, 400, { success: false, message: '订单ID格式错误' });
         }
         
@@ -313,6 +317,7 @@ const server = http.createServer(async (req, res) => {
         );
         
         if (duplicate) {
+          console.log('[api] submit duplicate:', duplicate.phone === phone ? 'phone' : 'orderId');
           return sendJSON(res, 400, { 
             success: false, 
             message: duplicate.phone === phone ? '该手机号已提交过' : '该订单ID已提交过' 
