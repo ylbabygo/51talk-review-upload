@@ -93,3 +93,7 @@ logs/
 # CodeGraph index
 .codegraph
 .codegraph/
+
+# 用户数据（敏感信息）
+data/submissions.json
+data/images/
