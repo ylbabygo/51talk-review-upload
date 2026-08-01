@@ -1,11 +1,16 @@
 {
   "name": "51talk-review-upload",
   "version": "1.0.0",
-  "description": "51Talk好评截图上传H5页面",
+  "description": "51Talk 好评截图上传 H5 页面",
   "main": "server.js",
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
     "start": "node server.js",
-    "dev": "node server.js"
+    "dev": "node server.js",
+    "check": "node --check server.js",
+    "test": "node --test"
   },
   "keywords": ["51talk", "h5", "upload"],
   "author": "",
