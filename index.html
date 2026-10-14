@@ -224,7 +224,8 @@
         imageData: null,
         orderId: '',
         phone: '',
-        isSubmitting: false
+        isSubmitting: false,
+        submitted: false
       };
 
       // 文件选择处理
@@ -513,80 +514,58 @@
         btnText.textContent = '正在提交…';
         btnArrow.innerHTML = '<div class="loading-spinner"></div>';
 
+        let timeoutId;
         try {
-          // 调试日志
-          console.log('[submit] 开始提交，订单ID:', state.orderId, '手机号:', state.phone, '图片数据长度:', state.imageData ? state.imageData.length : 0);
-
           // 调用真实API提交（带超时处理）
-          let timeoutId;
-          let fetchPromise;
-
-          // 兼容微信浏览器（可能不支持AbortController）
-          if (typeof AbortController !== 'undefined') {
-            const controller = new AbortController();
-            timeoutId = setTimeout(() => controller.abort(), 30000); // 30秒超时
-
-            fetchPromise = fetch('/api/submit', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify({
-                orderId: state.orderId,
-                phone: state.phone,
-                imageData: state.imageData, // base64图片数据
-              }),
-              signal: controller.signal,
-            });
-          } else {
-            // 降级方案：不使用AbortController
-            fetchPromise = fetch('/api/submit', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify({
-                orderId: state.orderId,
-                phone: state.phone,
-                imageData: state.imageData, // base64图片数据
-              }),
-            });
-
-            // 手动超时处理
+          const controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
+          const requestPromise = fetch('/api/submit', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              orderId: state.orderId,
+              phone: state.phone,
+              imageData: state.imageData,
+            }),
+            ...(controller ? { signal: controller.signal } : {}),
+          });
+          const timeoutPromise = new Promise((_, reject) => {
             timeoutId = setTimeout(() => {
-              throw new Error('提交超时');
+              if (controller) controller.abort();
+              const timeoutError = new Error('提交超时');
+              timeoutError.name = 'TimeoutError';
+              reject(timeoutError);
             }, 30000);
-          }
+          });
 
-          const response = await fetchPromise;
-          clearTimeout(timeoutId);
-          const result = await response.json();
-
-          console.log('[submit] 响应状态:', response.status, '响应结果:', result);
+          const response = await Promise.race([requestPromise, timeoutPromise]);
+          const result = await response.json().catch(() => ({ message: '服务器响应异常' }));
 
           if (!response.ok) {
             throw new Error(result.message || result.error || '提交失败');
           }
 
           // 提交成功
-          console.log('[submit] 提交成功');
+          state.submitted = true;
           showSuccessPage();
         } catch (error) {
           // 提交失败
-          console.error('[submit] 提交失败:', error);
           btnText.textContent = '确认提交';
           btnArrow.textContent = '→';
           btn.disabled = false;
           state.isSubmitting = false;
 
           // 显示错误信息
-          if (error.name === 'AbortError' || error.message === '提交超时') {
+          if (error.name === 'AbortError' || error.name === 'TimeoutError' || error.message === '提交超时') {
             alert('提交超时，请检查网络连接后重试');
           } else if (error.message.includes('已提交') || error.message.includes('重复')) {
             alert(error.message);
           } else {
             alert('提交失败：' + error.message);
           }
+        } finally {
+          clearTimeout(timeoutId);
         }
       }
 
@@ -642,7 +621,7 @@
 
       // 页面离开提示
       window.addEventListener('beforeunload', function(e) {
-        if (state.imageUploaded || state.orderId) {
+        if (!state.submitted && (state.imageUploaded || state.orderId || state.phone)) {
           e.preventDefault();
           e.returnValue = '';
         }
