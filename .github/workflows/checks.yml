@@ -1,0 +1,20 @@
+name: Application checks
+on:
+  push:
+    branches: [main, 'codex/**']
+  pull_request:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+      - run: npm run check
+      - run: npm test
+      - run: npm run build
+      - run: npx --yes wrangler@4.151.0 deploy --dry-run

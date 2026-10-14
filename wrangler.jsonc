@@ -1,0 +1,36 @@
+{
+  "$schema": "https://unpkg.com/wrangler@4.151.0/config-schema.json",
+  "name": "51talk-review-upload",
+  "account_id": "08bec297e894aa52534900d94778931a",
+  "main": "src/worker.ts",
+  "compatibility_date": "2026-08-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "keep_vars": true,
+  "workers_dev": true,
+  "preview_urls": false,
+  "routes": [
+    { "pattern": "51talkpingjia.shop/*", "zone_name": "51talkpingjia.shop" },
+    { "pattern": "www.51talkpingjia.shop", "custom_domain": true }
+  ],
+  "assets": {
+    "directory": "./dist",
+    "binding": "ASSETS",
+    "run_worker_first": true
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "51talk-review-upload-db",
+      "database_id": "eda26183-9ede-41cd-b53d-b138f2903c68"
+    }
+  ],
+  "kv_namespaces": [
+    { "binding": "IMAGES", "id": "4bfea5b60b0843f0ada7b18ee5212b0e" }
+  ],
+  "observability": {
+    "enabled": true,
+    "head_sampling_rate": 1,
+    "logs": { "enabled": true, "head_sampling_rate": 1, "persist": true, "invocation_logs": true },
+    "traces": { "enabled": false, "persist": true, "head_sampling_rate": 1 }
+  }
+}

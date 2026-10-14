@@ -3,9 +3,14 @@
   "version": "1.0.0",
   "description": "51Talk好评截图上传H5页面",
   "main": "server.js",
+  "engines": { "node": "24.x" },
   "scripts": {
     "start": "node server.js",
-    "dev": "node server.js"
+    "dev": "node server.js",
+    "check": "node --experimental-transform-types scripts/check.js",
+    "test": "node --experimental-transform-types --test test/*.test.mjs",
+    "build": "node scripts/build.js",
+    "deploy": "npm run check && npm test && npm run build && npx --yes wrangler@4.151.0 deploy"
   },
   "keywords": ["51talk", "h5", "upload"],
   "author": "",

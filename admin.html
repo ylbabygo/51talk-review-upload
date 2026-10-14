@@ -1,376 +1,292 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>51Talk - 数据管理后台</title>
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-      background: #f5f5f5;
-      color: #333;
-    }
-
-    .header {
-      background: #4F46E5;
-      color: white;
-      padding: 20px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .header h1 {
-      font-size: 20px;
-      font-weight: 600;
-    }
-
-    .header .stats {
-      font-size: 14px;
-      opacity: 0.9;
-    }
-
-    .container {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 20px;
-    }
-
-    .filter-bar {
-      background: white;
-      padding: 16px;
-      border-radius: 8px;
-      margin-bottom: 20px;
-      display: flex;
-      gap: 12px;
-      flex-wrap: wrap;
-    }
-
-    .filter-bar input,
-    .filter-bar button {
-      padding: 8px 12px;
-      border: 1px solid #ddd;
-      border-radius: 6px;
-      font-size: 14px;
-    }
-
-    .filter-bar input {
-      flex: 1;
-      min-width: 200px;
-    }
-
-    .filter-bar button {
-      background: #4F46E5;
-      color: white;
-      border: none;
-      cursor: pointer;
-    }
-
-    .filter-bar button:hover {
-      background: #4338ca;
-    }
-
-    .table-container {
-      background: white;
-      border-radius: 8px;
-      overflow: hidden;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-    }
-
-    th, td {
-      padding: 12px 16px;
-      text-align: left;
-      border-bottom: 1px solid #eee;
-    }
-
-    th {
-      background: #f9fafb;
-      font-weight: 600;
-      font-size: 14px;
-      color: #666;
-    }
-
-    td {
-      font-size: 14px;
-    }
-
-    tr:hover {
-      background: #f9fafb;
-    }
-
-    .image-thumb {
-      width: 60px;
-      height: 60px;
-      object-fit: cover;
-      border-radius: 4px;
-      cursor: pointer;
-    }
-
-    .image-thumb:hover {
-      opacity: 0.8;
-    }
-
-    .delete-btn {
-      background: #EF4444;
-      color: white;
-      border: none;
-      padding: 6px 12px;
-      border-radius: 4px;
-      cursor: pointer;
-      font-size: 13px;
-    }
-
-    .delete-btn:hover {
-      background: #DC2626;
-    }
-
-    .empty-state {
-      text-align: center;
-      padding: 60px 20px;
-      color: #999;
-    }
-
-    .empty-state svg {
-      width: 64px;
-      height: 64px;
-      margin-bottom: 16px;
-      opacity: 0.5;
-    }
-
-    .modal {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: rgba(0,0,0,0.8);
-      z-index: 1000;
-      justify-content: center;
-      align-items: center;
-    }
-
-    .modal.active {
-      display: flex;
-    }
-
-    .modal img {
-      max-width: 90%;
-      max-height: 90%;
-      border-radius: 8px;
-    }
-
-    .modal-close {
-      position: absolute;
-      top: 20px;
-      right: 20px;
-      color: white;
-      font-size: 32px;
-      cursor: pointer;
-    }
-
-    .loading {
-      text-align: center;
-      padding: 40px;
-      color: #666;
-    }
-
-    .error {
-      text-align: center;
-      padding: 40px;
-      color: #ef4444;
-    }
-
-    @media (max-width: 768px) {
-      .filter-bar {
-        flex-direction: column;
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>51Talk - 数据管理后台</title>
+    <style>
+      * { box-sizing: border-box; }
+      body { margin: 0; color: #1f2937; background: #f6f7fb; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+      button, input { font: inherit; }
+      button { cursor: pointer; }
+      .hidden { display: none !important; }
+      .login-card { width: min(400px, calc(100% - 32px)); margin: 12vh auto 0; padding: 32px; border-radius: 18px; background: #fff; box-shadow: 0 20px 60px rgba(31, 41, 55, 0.12); }
+      .login-card h1 { margin: 0 0 8px; font-size: 24px; }
+      .login-card p { margin: 0 0 24px; color: #6b7280; }
+      .login-card input { width: 100%; height: 48px; padding: 0 14px; border: 1px solid #d1d5db; border-radius: 10px; }
+      .login-card button { width: 100%; height: 48px; margin-top: 14px; border: 0; border-radius: 10px; color: #fff; background: #4f46e5; font-weight: 700; }
+      .message { min-height: 20px; margin-top: 12px; color: #dc2626; font-size: 14px; }
+      .header { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 18px 24px; color: #fff; background: #4f46e5; }
+      .header h1 { margin: 0; font-size: 20px; }
+      .header button { padding: 8px 14px; border: 1px solid rgba(255,255,255,.5); border-radius: 8px; color: #fff; background: transparent; }
+      .container { width: min(1180px, calc(100% - 32px)); margin: 24px auto; }
+      .stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; margin-bottom: 18px; }
+      .stat-card { padding: 18px; border-radius: 12px; background: #fff; box-shadow: 0 4px 18px rgba(31,41,55,.06); }
+      .stat-card span { color: #6b7280; font-size: 13px; }
+      .stat-card strong { display: block; margin-top: 6px; font-size: 28px; }
+      .toolbar { display: flex; gap: 10px; padding: 14px; border-radius: 12px 12px 0 0; background: #fff; }
+      .toolbar input { flex: 1; min-width: 0; height: 40px; padding: 0 12px; border: 1px solid #d1d5db; border-radius: 8px; }
+      .toolbar button { padding: 0 14px; border: 0; border-radius: 8px; color: #fff; background: #4f46e5; }
+      .table-wrap { overflow: auto; border-radius: 0 0 12px 12px; background: #fff; }
+      table { width: 100%; border-collapse: collapse; }
+      th, td { padding: 12px 14px; border-top: 1px solid #eef0f4; text-align: left; white-space: nowrap; }
+      th { color: #6b7280; background: #fafafa; font-size: 13px; }
+      td { font-size: 14px; }
+      .image-thumb { width: 56px; height: 56px; border-radius: 7px; object-fit: cover; }
+      .delete-btn { padding: 7px 12px; border: 0; border-radius: 7px; color: #fff; background: #dc2626; }
+      .empty { padding: 48px 16px; color: #6b7280; text-align: center; }
+      .modal { position: fixed; inset: 0; display: none; align-items: center; justify-content: center; padding: 24px; background: rgba(0,0,0,.82); }
+      .modal.active { display: flex; }
+      .modal img { max-width: 92vw; max-height: 90vh; border-radius: 10px; }
+      @media (max-width: 700px) {
+        .stats { grid-template-columns: 1fr; }
+        .toolbar { flex-wrap: wrap; }
+        .toolbar input { flex-basis: 100%; }
       }
+    </style>
+  </head>
+  <body>
+    <section id="loginPage" class="login-card">
+      <h1>数据管理后台</h1>
+      <p>请输入管理员密码继续</p>
+      <form id="loginForm">
+        <input id="password" type="password" autocomplete="current-password" placeholder="管理员密码" required />
+        <button type="submit">登录</button>
+      </form>
+      <div id="loginMessage" class="message" role="alert"></div>
+    </section>
 
-      .filter-bar input {
-        min-width: 100%;
-      }
+    <section id="adminPage" class="hidden">
+      <header class="header">
+        <h1>51Talk 好评截图管理</h1>
+        <button id="logoutButton" type="button">退出登录</button>
+      </header>
+      <main class="container">
+        <div class="stats">
+          <div class="stat-card"><span>总提交数</span><strong id="totalCount">0</strong></div>
+          <div class="stat-card"><span>今日提交</span><strong id="todayCount">0</strong></div>
+          <div class="stat-card"><span>待审核</span><strong id="pendingCount">0</strong></div>
+        </div>
+        <div class="toolbar">
+          <input id="searchInput" type="search" placeholder="搜索手机号或订单 ID" />
+          <button id="refreshButton" type="button">刷新</button>
+          <button id="exportButton" type="button">导出 CSV</button>
+        </div>
+        <div class="table-wrap">
+          <div id="content" class="empty">加载中…</div>
+        </div>
+      </main>
+    </section>
 
-      table {
-        font-size: 12px;
-      }
-
-      th, td {
-        padding: 8px;
-      }
-    }
-  </style>
-</head>
-<body>
-  <div class="header">
-    <h1>51Talk 好评截图管理后台</h1>
-    <div class="stats" id="stats">加载中...</div>
-  </div>
-
-  <div class="container">
-    <div class="filter-bar">
-      <input type="text" id="searchInput" placeholder="搜索订单ID或手机号..." />
-      <button onclick="loadData()">搜索</button>
-      <button onclick="exportData()">导出数据</button>
+    <div id="imageModal" class="modal" aria-hidden="true">
+      <img id="modalImage" src="" alt="截图预览" />
     </div>
 
-    <div class="table-container">
-      <div id="content">
-        <div class="loading">加载中...</div>
-      </div>
-    </div>
-  </div>
-
-  <div class="modal" id="imageModal" onclick="closeModal()">
-    <span class="modal-close">&times;</span>
-    <img id="modalImage" src="" alt="预览" />
-  </div>
-
-  <script>
-    let allData = [];
-
-    async function loadData() {
-      const search = document.getElementById('searchInput').value.trim();
+    <script>
+      const state = { submissions: [] };
+      const loginPage = document.getElementById('loginPage');
+      const adminPage = document.getElementById('adminPage');
       const content = document.getElementById('content');
-      const stats = document.getElementById('stats');
 
-      content.innerHTML = '<div class="loading">加载中...</div>';
-
-      try {
-        const url = search ? `/api/submissions?search=${encodeURIComponent(search)}` : '/api/submissions';
-        const response = await fetch(url);
-        const result = await response.json();
-
-        if (!result.success) {
-          content.innerHTML = '<div class="error">加载失败</div>';
-          return;
-        }
-
-        allData = result.data;
-        stats.textContent = `共 ${result.total} 条记录`;
-
-        if (allData.length === 0) {
-          content.innerHTML = `
-            <div class="empty-state">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-              </svg>
-              <p>暂无数据</p>
-            </div>
-          `;
-          return;
-        }
-
-        let html = `
-          <table>
-            <thead>
-              <tr>
-                <th>序号</th>
-                <th>订单ID</th>
-                <th>手机号</th>
-                <th>截图</th>
-                <th>提交时间</th>
-                <th>操作</th>
-              </tr>
-            </thead>
-            <tbody>
-        `;
-
-        allData.forEach((item, index) => {
-          const time = new Date(item.submittedAt).toLocaleString('zh-CN');
-          const imageSrc = item.imageUrl || '';
-          const hasImage = item.imageUrl ? 'yes' : 'no';
-          html += `
-            <tr>
-              <td>${index + 1}</td>
-              <td>${item.orderId}</td>
-              <td>${item.phone}</td>
-              <td>${hasImage === 'yes' ? `<img class="image-thumb" src="${imageSrc}" onclick="showImage('${imageSrc}')" />` : '<span style="color:#999;font-size:12px;">无图片</span>'}</td>
-              <td>${time}</td>
-              <td><button class="delete-btn" onclick="deleteItem('${item.id}')">删除</button></td>
-            </tr>
-          `;
-        });
-
-        html += '</tbody></table>';
-        content.innerHTML = html;
-
-      } catch (err) {
-        content.innerHTML = '<div class="error">加载失败：' + err.message + '</div>';
-      }
-    }
-
-    function showImage(url) {
-      document.getElementById('modalImage').src = url;
-      document.getElementById('imageModal').classList.add('active');
-    }
-
-    function closeModal() {
-      document.getElementById('imageModal').classList.remove('active');
-    }
-
-    function exportData() {
-      if (allData.length === 0) {
-        alert('暂无数据可导出');
-        return;
-      }
-
-      let csv = '订单ID,手机号,提交时间\n';
-      allData.forEach(item => {
-        const time = new Date(item.submittedAt).toLocaleString('zh-CN');
-        csv += `${item.orderId},${item.phone},${time}\n`;
-      });
-
-      const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
-      const link = document.createElement('a');
-      link.href = URL.createObjectURL(blob);
-      link.download = `51talk_submissions_${new Date().toISOString().slice(0,10)}.csv`;
-      link.click();
-    }
-
-    async function deleteItem(id) {
-      if (!confirm('确定要删除这条数据吗？删除后无法恢复。')) {
-        return;
-      }
-
-      try {
-        const response = await fetch('/api/admin/delete', {
-          method: 'POST',
+      async function apiRequest(url, options = {}) {
+        const response = await fetch(url, {
+          credentials: 'same-origin',
+          ...options,
           headers: {
-            'Content-Type': 'application/json',
+            ...(options.body ? { 'Content-Type': 'application/json' } : {}),
+            ...(options.headers || {}),
           },
+        });
+        const result = await response.json().catch(() => ({ success: false, message: '服务器响应异常' }));
+        return { response, result };
+      }
+
+      function showLogin(message = '') {
+        adminPage.classList.add('hidden');
+        loginPage.classList.remove('hidden');
+        document.getElementById('loginMessage').textContent = message;
+      }
+
+      function showAdmin() {
+        loginPage.classList.add('hidden');
+        adminPage.classList.remove('hidden');
+      }
+
+      function updateStats(items) {
+        const today = new Date().toDateString();
+        document.getElementById('totalCount').textContent = items.length;
+        document.getElementById('todayCount').textContent = items.filter((item) => new Date(item.submittedAt).toDateString() === today).length;
+        document.getElementById('pendingCount').textContent = items.filter((item) => item.status === 'pending').length;
+      }
+
+      function appendCell(row, value) {
+        const cell = document.createElement('td');
+        cell.textContent = value;
+        row.appendChild(cell);
+        return cell;
+      }
+
+      function renderTable() {
+        const keyword = document.getElementById('searchInput').value.trim();
+        const items = keyword
+          ? state.submissions.filter((item) => item.phone.includes(keyword) || item.orderId.includes(keyword))
+          : state.submissions;
+
+        content.replaceChildren();
+        if (!items.length) {
+          content.className = 'empty';
+          content.textContent = '暂无数据';
+          return;
+        }
+
+        content.className = '';
+        const table = document.createElement('table');
+        const head = document.createElement('thead');
+        const headRow = document.createElement('tr');
+        ['提交时间', '手机号', '订单 ID', '截图', '状态', '操作'].forEach((label) => {
+          const th = document.createElement('th');
+          th.textContent = label;
+          headRow.appendChild(th);
+        });
+        head.appendChild(headRow);
+        table.appendChild(head);
+
+        const body = document.createElement('tbody');
+        items.forEach((item) => {
+          const row = document.createElement('tr');
+          appendCell(row, new Date(item.submittedAt).toLocaleString('zh-CN'));
+          appendCell(row, item.phone);
+          appendCell(row, item.orderId);
+
+          const imageCell = document.createElement('td');
+          if (item.imageUrl) {
+            const image = document.createElement('img');
+            image.className = 'image-thumb';
+            image.src = item.imageUrl;
+            image.alt = '好评截图';
+            image.addEventListener('click', () => showImage(item.imageUrl));
+            imageCell.appendChild(image);
+          } else {
+            imageCell.textContent = '无图片';
+          }
+          row.appendChild(imageCell);
+
+          appendCell(row, item.status === 'pending' ? '待审核' : item.status);
+          const actionCell = document.createElement('td');
+          const deleteButton = document.createElement('button');
+          deleteButton.type = 'button';
+          deleteButton.className = 'delete-btn';
+          deleteButton.textContent = '删除';
+          deleteButton.addEventListener('click', () => deleteItem(item.id));
+          actionCell.appendChild(deleteButton);
+          row.appendChild(actionCell);
+          body.appendChild(row);
+        });
+        table.appendChild(body);
+        content.appendChild(table);
+      }
+
+      async function loadData() {
+        content.className = 'empty';
+        content.textContent = '加载中…';
+        const { response, result } = await apiRequest('/api/admin/submissions');
+        if (response.status === 401) {
+          showLogin('登录状态已失效，请重新登录');
+          return;
+        }
+        if (!response.ok || !result.success) {
+          content.textContent = result.message || '加载失败';
+          return;
+        }
+
+        state.submissions = result.data || [];
+        showAdmin();
+        updateStats(state.submissions);
+        renderTable();
+      }
+
+      async function deleteItem(id) {
+        if (!window.confirm('确定删除这条数据吗？该操作无法撤销。')) return;
+        const { response, result } = await apiRequest('/api/admin/delete', {
+          method: 'POST',
           body: JSON.stringify({ id }),
         });
-
-        const result = await response.json();
-
-        if (result.success) {
-          alert('删除成功');
-          loadData(); // 重新加载数据
-        } else {
-          alert('删除失败：' + result.message);
+        if (response.status === 401) {
+          showLogin('登录状态已失效，请重新登录');
+          return;
         }
-      } catch (err) {
-        alert('删除失败：' + err.message);
+        if (!response.ok || !result.success) {
+          window.alert(result.message || '删除失败');
+          return;
+        }
+        await loadData();
       }
-    }
 
-    // 页面加载时获取数据
-    loadData();
+      function showImage(url) {
+        document.getElementById('modalImage').src = url;
+        document.getElementById('imageModal').classList.add('active');
+        document.getElementById('imageModal').setAttribute('aria-hidden', 'false');
+      }
 
-    // 回车搜索
-    document.getElementById('searchInput').addEventListener('keypress', (e) => {
-      if (e.key === 'Enter') loadData();
-    });
-  </script>
-</body>
+      function closeImage() {
+        document.getElementById('imageModal').classList.remove('active');
+        document.getElementById('imageModal').setAttribute('aria-hidden', 'true');
+        document.getElementById('modalImage').src = '';
+      }
+
+      function csvValue(value) {
+        let text = String(value ?? '');
+        if (/^[=+\-@]/.test(text)) text = `'${text}`;
+        return `"${text.replace(/"/g, '""')}"`;
+      }
+
+      function exportData() {
+        if (!state.submissions.length) {
+          window.alert('暂无数据可导出');
+          return;
+        }
+        const rows = [['订单 ID', '手机号', '提交时间']];
+        state.submissions.forEach((item) => rows.push([
+          item.orderId,
+          item.phone,
+          new Date(item.submittedAt).toLocaleString('zh-CN'),
+        ]));
+        const csv = rows.map((row) => row.map(csvValue).join(',')).join('\n');
+        const blob = new Blob([`\ufeff${csv}`], { type: 'text/csv;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `51talk_submissions_${new Date().toISOString().slice(0, 10)}.csv`;
+        link.click();
+        URL.revokeObjectURL(url);
+      }
+
+      document.getElementById('loginForm').addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const password = document.getElementById('password').value;
+        const { response, result } = await apiRequest('/api/admin/login', {
+          method: 'POST',
+          body: JSON.stringify({ password }),
+        });
+        if (!response.ok || !result.success) {
+          showLogin(result.message || '登录失败');
+          return;
+        }
+        document.getElementById('password').value = '';
+        await loadData();
+      });
+
+      document.getElementById('logoutButton').addEventListener('click', async () => {
+        await apiRequest('/api/admin/logout', { method: 'POST' });
+        state.submissions = [];
+        showLogin();
+      });
+      document.getElementById('refreshButton').addEventListener('click', loadData);
+      document.getElementById('exportButton').addEventListener('click', exportData);
+      document.getElementById('searchInput').addEventListener('input', renderTable);
+      document.getElementById('imageModal').addEventListener('click', closeImage);
+
+      loadData().catch(() => showLogin('服务器连接失败'));
+    </script>
+  </body>
 </html>

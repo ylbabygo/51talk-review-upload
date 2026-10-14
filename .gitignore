@@ -97,3 +97,7 @@ logs/
 # 用户数据（敏感信息）
 data/submissions.json
 data/images/
+data/
+.wrangler/
+.dev.vars
+.dev.vars.*
